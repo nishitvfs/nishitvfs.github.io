@@ -1,0 +1,499 @@
+openapi: 3.0.2
+info:
+  title: B2B Channel API Integration Document
+  description: Specification for B2B Channel Integration
+  contact:
+    name: Nishit Salian
+    email: nishitsa@vfsglobal.com
+  version: "1.0"
+externalDocs:
+  description: More context into VFS
+  url: https://www.vfsglobal.com/en/individuals/index.html
+servers:
+- url: https://vfsglobal.example.com
+  description: Mock Server
+security:
+- JwtAuthToken: []
+paths:
+  /api/v1/fetchMasters:
+    get:
+      tags:
+      - Master Table Management
+      summary: Fetch Masters by type
+      description: Fetch Master table info by entering type values
+      operationId: fetchMasters
+      parameters:
+      - name: type
+        in: query
+        description: Type values that need to be considered for filter
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          default: gender
+          enum:
+          - gender
+          - salutation
+          - visa-type
+          - country
+          - mission-country
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MasterTableManagement'
+              examples:
+                gender-data:
+                  summary: gender
+                  value:
+                    status: 200
+                    message: Success
+                    data:
+                      genders:
+                      - label: Male
+                        id: 1
+                      - label: Female
+                        id: 2
+                      - label: Other
+                        id: 3
+                    meta:
+                      totalCount: 3
+                      timestamp: 2024-10-07T12:00:00Z
+                salutation-data:
+                  summary: salutation
+                  value:
+                    status: 200
+                    message: Request successful
+                    data:
+                      titles:
+                      - label: Mr
+                        id: 1
+                      - label: Miss
+                        id: 2
+                      - label: Mrs
+                        id: 3
+                      - label: Master
+                        id: 4
+                      - label: Ms
+                        id: 5
+                    meta:
+                      totalCount: 5
+                      timestamp: 2024-10-07T12:00:00Z
+                visa-type-data:
+                  summary: visa-type
+                  value:
+                    status: 200
+                    message: Success
+                    data:
+                      visa_type:
+                      - type: Standard
+                        id: 1
+                      - type: Urgent
+                        id: 2
+                    meta:
+                      totalCount: 2
+                      timestamp: 2024-10-08T12:00:00Z
+                country-data:
+                  summary: country
+                  value:
+                    status: 200
+                    message: Success
+                    data:
+                      country:
+                      - name: ETHIOPIA
+                        id: 1
+                      - type: BHUTAN
+                        id: 2
+                      - type: GEORGIA
+                        id: 2
+                      - type: MALTA
+                        id: 2
+                    meta:
+                      totalCount: 4
+                      timestamp: 2024-10-08T12:00:00Z
+                routes-data:
+                  summary: routes
+                  value:
+                    status: 200
+                    message: Success
+                    data:
+                      routes:
+                      - route_id: 9
+                        mission_id: 12
+                        mission_name: AZERBAIJAN
+                        country_id: 43
+                        country_name: BANGLADESH
+                        is_active: true
+                        updated_at: 2024-09-20 14:39:22
+                      - route_id: 27
+                        mission_id: 13
+                        mission_name: FRANCE
+                        country_id: 44
+                        country_name: INDIA
+                        is_active: false
+                        updated_at: 2024-09-19 10:30:12
+                    meta:
+                      totalCount: 2
+                      timestamp: 2024-10-08T12:00:00Z
+        "400":
+          description: Invalid request. Please check the request parameters and try again.
+        "401":
+          description: Authorization required. Please provide valid credentials.
+        "403":
+          description: Forbidden. Your credentials do not grant access to this resource.
+        "404":
+          description: Resource not available. Please check the URL or request parameters.
+        "500":
+          description: The server encountered an unexpected condition that prevented it from fulfilling the request.
+      security: []
+  /api/v1/fetchPaymentInfo:
+    get:
+      tags:
+      - Payment Summary
+      summary: Approach 1 - Fetch Payment Info for applications
+      description: This API fetches payment information for given application IDs.
+      operationId: paymentSummaryv1
+      parameters:
+      - name: vfsapplicationId
+        in: query
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: efgh-lkusm-12345
+      responses:
+        "200":
+          description: Successful response with an array of items
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "400":
+          description: Invalid request. Please check the request parameters and try again.
+        "401":
+          description: Authorization required. Please provide valid credentials.
+        "403":
+          description: Forbidden. Your credentials do not grant access to this resource.
+        "404":
+          description: Resource not available. Please check the URL or request parameters.
+        "500":
+          description: The server encountered an unexpected condition that prevented it from fulfilling the request.
+  /api/v1/getVAFChecklist:
+    get:
+      tags:
+      - Master Table Management
+      summary: Fetch Checklist and VAF Fields
+      description: API for fetching document checklist and VAF fields for specific routes entered by user.
+      operationId: fetchChecklistAndVAF
+      parameters:
+      - name: route_id
+        in: query
+        description: The ID of the route for which to fetch the checklist.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Successful response with document checklist and VAF fields.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_1'
+        "400":
+          description: Invalid request. Please check the request parameters and try again.
+        "404":
+          description: Route not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+components:
+  schemas:
+    MasterTableManagement:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: HTTP status code of the response.
+          format: int32
+          example: 200
+        message:
+          type: string
+          description: Message indicating the status of the operation.
+          example: Success
+        data:
+          $ref: '#/components/schemas/MasterTableManagement_data'
+        meta:
+          $ref: '#/components/schemas/MasterTableManagement_meta'
+    PaymentResponse:
+      type: object
+      properties:
+        totalApplications:
+          type: integer
+          example: 2
+        vfsapplicationId:
+          type: string
+          example: efgh-lkusm-12345
+        applications:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentResponse_applications'
+        paymentSummary:
+          $ref: '#/components/schemas/PaymentResponse_paymentSummary'
+    inline_response_200:
+      type: object
+      properties:
+        totalApplications:
+          type: integer
+          example: 2
+        vfsapplicationId:
+          type: string
+          example: efgh-lkusm-12345
+        applications:
+          type: array
+          example:
+          - applicationId: "12345"
+            applicantId: "9987"
+            paymentInfo:
+            - visaFeeBase: 100.0
+              visaFeeAdditional: 0
+              totalVisaFee: 100.0
+              vfsServiceFeeBase: 40.0
+              vfsAdditionalServicesFee: 0.0
+              totalVfsServiceFee: 40.0
+              discountApplied: false
+              discountAmount: 0.0
+              currency: USD
+              paymentBreakdown:
+              - visaFee: 100.0
+                vfsserviceFee: 40.0
+                discount: 0.0
+                taxes: 0.0
+          - applicationId: "12345"
+            applicantId: "9988"
+            paymentInfo:
+            - visaFeeBase: 80.0
+              visaFeeAdditional: 0
+              totalVisaFee: 80.0
+              vfsServiceFeeBase: 25.0
+              vfsAdditionalServicesFee: 0.0
+              totalVfsServiceFee: 25.0
+              discountApplied: true
+              discountAmount: 10.0
+              currency: USD
+              paymentBreakdown:
+              - visaFee: 80.0
+                vfsserviceFee: 25.0
+                discount: 10.0
+                taxes: 0.0
+          items:
+            $ref: '#/components/schemas/PaymentResponse'
+        paymentSummary:
+          $ref: '#/components/schemas/PaymentResponse_paymentSummary'
+    inline_response_200_1:
+      type: object
+      properties:
+        route_id:
+          type: integer
+          example: 190
+        documents_checklist:
+          type: array
+          items:
+            $ref: '#/components/schemas/inline_response_200_1_documents_checklist'
+        vaf_checklist:
+          type: array
+          items:
+            $ref: '#/components/schemas/inline_response_200_1_vaf_checklist'
+    inline_response_404:
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/inline_response_404_error'
+    MasterTableManagement_data_specific_master_type:
+      type: object
+      properties:
+        label:
+          type: string
+          description: Label for the gender.
+          example: Male
+        id:
+          type: integer
+          description: Unique identifier for the gender.
+          format: int32
+          example: 1
+    MasterTableManagement_data:
+      type: object
+      properties:
+        specific_master_type:
+          type: array
+          description: List of options for specific master type entered.
+          items:
+            $ref: '#/components/schemas/MasterTableManagement_data_specific_master_type'
+    MasterTableManagement_meta:
+      type: object
+      properties:
+        totalCount:
+          type: integer
+          description: Total number of gender entries.
+          format: int32
+          example: 3
+        timestamp:
+          type: string
+          description: Timestamp of the response in ISO 8601 format.
+          format: date-time
+          example: 2024-10-07T12:00:00Z
+    PaymentResponse_paymentBreakdown:
+      type: object
+      properties:
+        visaFee:
+          type: number
+          example: 100
+        vfsserviceFee:
+          type: number
+          example: 40
+        discount:
+          type: number
+          example: 0
+        taxes:
+          type: number
+          example: 0
+    PaymentResponse_paymentInfo:
+      type: object
+      properties:
+        visaFeeBase:
+          type: number
+          example: 100
+        visaFeeAdditional:
+          type: number
+          example: 0
+        totalVisaFee:
+          type: number
+          example: 100
+        vfsServiceFeeBase:
+          type: number
+          example: 40
+        vfsAdditionalServicesFee:
+          type: number
+          example: 0
+        totalVfsServiceFee:
+          type: number
+          example: 40
+        discountApplied:
+          type: string
+          example: "No"
+        discountAmount:
+          type: number
+          example: 0
+        currency:
+          type: string
+          example: USD
+        paymentBreakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentResponse_paymentBreakdown'
+    PaymentResponse_applications:
+      type: object
+      properties:
+        applicationId:
+          type: string
+          example: "12345"
+        applicantId:
+          type: string
+          example: "9987"
+        paymentInfo:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentResponse_paymentInfo'
+    PaymentResponse_paymentSummary:
+      type: object
+      properties:
+        visaFee:
+          type: number
+          example: 180
+        vfsserviceFee:
+          type: number
+          example: 65
+        discount:
+          type: number
+          example: 10
+        taxes:
+          type: number
+          example: 0
+        currency:
+          type: string
+          example: USD
+        totalAmountPayable:
+          type: number
+          example: 235
+    inline_response_200_1_documents_checklist:
+      type: object
+      properties:
+        doc_id:
+          type: integer
+          example: 28
+        doc_type:
+          type: string
+          example: photograph
+        description:
+          type: string
+          example: Recent passport-sized photograph with white background.
+        size_restriction:
+          type: string
+          example: 2 MB
+        is_mandatory:
+          type: boolean
+          example: true
+    inline_response_200_1_validation_remarks:
+      type: object
+      properties:
+        format:
+          type: string
+          example: DD/MM/YYYY
+        context:
+          type: string
+          example: Please ensure this is filled in the correct format.
+    inline_response_200_1_vaf_checklist:
+      type: object
+      properties:
+        field_id:
+          type: integer
+          example: 425
+        field_name:
+          type: string
+          example: date_of_birth
+        description:
+          type: string
+          example: Applicant's birth date. Mandatory field.
+        field_status:
+          type: string
+          example: present
+        incorrect_format:
+          type: boolean
+          example: true
+        validation_remarks:
+          $ref: '#/components/schemas/inline_response_200_1_validation_remarks'
+    inline_response_404_error:
+      type: object
+      properties:
+        route_id:
+          type: integer
+          example: 73
+        message:
+          type: string
+          example: Route not found
+        details:
+          type: string
+          example: No checklist available for the provided route ID.
+  securitySchemes:
+    JwtAuthToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
