@@ -9,6 +9,13 @@ info:
 servers:
 - url: https://vfsglobal.example.com
   description: Mock Server
+tags:
+  - name: Master Table Management
+    description: APIs related to fetching master info
+  - name: Payment Summary
+    description: APIs related to fetching payment info for applicant(s)
+  - name: OTA
+    description: APIs related to OTA operations, provided by VFS
 security:
 - JwtAuthToken: []
 externalDocs:
@@ -35,8 +42,14 @@ paths:
               - gender
               - salutation
               - visa-type
-              - country
-              - mission-country
+              - nationality
+              - route
+        - name: mission-icao-code
+          in: header
+          required: true
+          description: The ICAO code for the mission. This input will be taken in 'Headers'.
+          schema:
+            type: string
       responses:
         '200':
           description: successful operation
@@ -98,25 +111,29 @@ paths:
                       totalCount: 2
                       timestamp: 2024-10-08T12:00:00Z
                 country-data:
-                  summary: country
+                  summary: nationality
                   value:
                     status: 200
                     message: Success
                     data:
                       country:
                         - name: ETHIOPIA
+                          icao_code: ETH
                           id: 1
-                        - type: BHUTAN
+                        - name: BHUTAN
+                          icao_code: BHU
                           id: 2
-                        - type: GEORGIA
-                          id: 2
-                        - type: MALTA
-                          id: 2
+                        - name: GEORGIA
+                          icao_code: GEO
+                          id: 3
+                        - name: MALTA
+                          icao_code: MAL
+                          id: 4
                     meta:
                       totalCount: 4
                       timestamp: 2024-10-08T12:00:00Z
                 routes-data:
-                  summary: routes
+                  summary: route
                   value:
                     status: 200
                     message: Success
@@ -180,7 +197,7 @@ paths:
                       example: "efgh-lkusm-12345"
                     applications:
                       type: array
-                      items:
+                      items:a
                         $ref: '#/components/schemas/PaymentResponse'
                       example:
                         - applicationId: "12345"
@@ -343,6 +360,68 @@ paths:
                       details:
                         type: string
                         example: "No checklist available for the provided route ID."
+  /api/v1/ota/fetchQCRemarks:
+    get:
+      tags:
+        - OTA
+      summary: Fetch QC Remarks
+      description: Retrieves quality control remarks for a specific VFS application based on the provided application ID.
+      parameters:
+        - name: vfsApplicationId
+          in: query
+          required: true
+          description: The unique ID of the VFS application.
+          schema:
+            type: string
+        - name: mission-icao-code
+          in: header
+          required: true
+          description: The ICAO code for the mission. This input will be taken in 'Headers'.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response containing QC remarks.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QCRemarksResponse'
+              example:
+                - vfsApplicationId: eksld-394u93-nkdksl
+                  totalApplications: 3
+                  QCRemarks:
+                    - otaApplicationID: 12345
+                      remarks: Please provide a passport-sized photograph with a white background.
+                      status: Rejected
+                      createdAt: 2024-10-01T12:00:00Z
+                    - otaApplicationID: 67890
+                      remarks: Please provide a clear passport bio page. Uploaded file is blurry
+                      status: Rejected
+                      createdAt: 2024-10-01T12:00:00Z
+                    - otaApplicationID: 97527
+                      remarks: null
+                      status: Approved
+                      createdAt: 2024-10-01T12:00:00Z
+              
+        '400':
+          description: Bad Request, e.g., missing required parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Not Found, e.g., application ID does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 components:
   schemas:
     MasterTableManagement:
@@ -478,6 +557,45 @@ components:
             totalAmountPayable:
               type: number
               example: 235
+    QCRemarksResponse:
+      type: object
+      properties:
+        vfsApplicationId:
+          type: string
+          example: "eksld-394u93-nkdksl"
+        totalApplications:
+          type: integer
+          example: 3
+        ApplicationRemarks:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApplicationRemarks'
+    ApplicationRemarks:
+      type: object
+      properties:
+        otaApplicationID:
+          type: integer
+          example: 12345
+        remarks:
+         type: string
+         example: "Need passport-sized photograph"
+        status:
+          type: string
+          example: "Rejected"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-10-01T12:00:00Z"
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: "Invalid request parameters."
       
   securitySchemes:
     JwtAuthToken:
