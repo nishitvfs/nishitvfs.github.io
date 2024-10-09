@@ -75,7 +75,7 @@ paths:
                           id: 3
                     meta:
                       totalCount: 3
-                      timestamp: 2024-10-07
+                      timestamp: "2024-10-07"
                 salutation-data:
                   summary: salutation
                   value:
@@ -95,7 +95,7 @@ paths:
                           id: 5
                     meta:
                       totalCount: 5
-                      timestamp: 2024-10-07
+                      timestamp: "2024-10-07"
                 visa-type-data:
                   summary: visa-type
                   value:
