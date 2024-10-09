@@ -197,7 +197,7 @@ paths:
                       example: "efgh-lkusm-12345"
                     applications:
                       type: array
-                      items:a
+                      items:
                         $ref: '#/components/schemas/PaymentResponse'
                       example:
                         - applicationId: "12345"
@@ -405,23 +405,10 @@ paths:
               
         '400':
           description: Bad Request, e.g., missing required parameter.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Not Found, e.g., application ID does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal Server Error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
 components:
   schemas:
     MasterTableManagement:
@@ -596,6 +583,7 @@ components:
         message:
           type: string
           example: "Invalid request parameters."
+
       
   securitySchemes:
     JwtAuthToken:
