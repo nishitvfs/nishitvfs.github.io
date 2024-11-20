@@ -12,12 +12,14 @@ servers:
 tags:
   - name: Master Table Management
     description: APIs related to fetching master info
+  - name: Group Management
+    description: APIs related to creation and updation of group Ids
   - name: Payment Summary
     description: APIs related to fetching payment info for applicant(s)
   - name: OTA
     description: APIs related to OTA operations, provided by VFS
 security:
-- JwtAuthToken: []
+- OAuth2: []
 externalDocs:
   description: More context into VFS
   url: https://www.vfsglobal.com/en/individuals/index.html
@@ -166,7 +168,122 @@ paths:
           description: Resource not available. Please check the URL or request parameters.
         500:
           description: The server encountered an unexpected condition that prevented it from fulfilling the request.  
-      security: []
+      security:
+        - OAuth2: []
+  /api/v1/groups:
+    post:
+      tags:
+        - Group Management
+      summary: Create a new group ID for applicants
+      description: Creates a new group ID for the specified number of applicants.
+      security:
+        - OAuth2: []
+      requestBody:
+        description: Number of applicants for the group.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                applicantCount:
+                  type: integer
+                  description: The number of applicants in the group.
+                  example: 5
+              required:
+                - applicantCount
+      responses:
+        '201':
+          description: Group ID successfully created.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  groupId:
+                    type: string
+                    description: The unique identifier for the created group.
+                    example: idn-168378-nkdkls
+                  applicantCount:
+                    type: integer
+                    description: The number of applicants in the group.
+                    example: 5
+        '400':
+          description: Bad request. Invalid input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid applicant count.
+  /api/v1/groups/{groupId}:
+    patch:
+      tags:
+        - Group Management
+      summary: Update the applicant count for an existing group ID
+      description: Updates the number of applicants associated with a specific group ID.
+      security:
+        - OAuth2: []
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          description: The unique identifier of the group.
+          schema:
+            type: string
+            example: idn-168378-nkdkls
+      requestBody:
+        description: Updated applicant count for the group.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                applicantCount:
+                  type: integer
+                  description: The updated number of applicants in the group.
+                  example: 6
+              required:
+                - applicantCount
+      responses:
+        '200':
+          description: Group ID successfully updated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  groupId:
+                    type: string
+                    description: The unique identifier of the group.
+                    example: idn-168378-nkdkls
+                  applicantCount:
+                    type: integer
+                    description: The updated number of applicants in the group.
+                    example: 6
+        '404':
+          description: Group ID not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Group ID not found.
+        '400':
+          description: Bad request. Invalid input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid applicant count.                  
   /api/v1/fetchPaymentInfo:
       get:
         tags:
@@ -582,11 +699,17 @@ components:
           example: 400
         message:
           type: string
-          example: "Invalid request parameters."
-
-      
+          example: "Invalid request parameters."      
   securitySchemes:
     JwtAuthToken:
       type: http
       scheme: bearer
       bearerFormat: JWT
+    OAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://auth.example.com/oauth/token
+          scopes:
+            read: Grants read access
+            write: Grants write access
