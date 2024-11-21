@@ -291,7 +291,7 @@ paths:
         summary: Approach 1 - Fetch Payment Info for applications 
         description: This API fetches payment information for given application IDs.
         parameters:
-          - name: vfsapplicationId
+          - name: vfsGroupId
             in: query
             required: true
             schema:
@@ -309,7 +309,7 @@ paths:
                     totalApplications:
                       type: integer
                       example: 2
-                    vfsapplicationId:
+                    vfsGroupId:
                       type: string
                       example: "efgh-lkusm-12345"
                     applications:
@@ -484,7 +484,7 @@ paths:
       summary: Fetch QC Remarks
       description: Retrieves quality control remarks for a specific VFS application based on the provided application ID.
       parameters:
-        - name: vfsApplicationId
+        - name: vfsGroupId
           in: query
           required: true
           description: The unique ID of the VFS application.
@@ -504,18 +504,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/QCRemarksResponse'
               example:
-                - vfsApplicationId: eksld-394u93-nkdksl
+                - vfsGroupId: eksld-394u93-nkdksl
                   totalApplications: 3
                   QCRemarks:
-                    - otaApplicationID: 12345
+                    - vfsApplicationId: 12345
                       remarks: Please provide a passport-sized photograph with a white background.
                       status: Rejected
                       createdAt: 2024-10-01
-                    - otaApplicationID: 67890
+                    - vfsApplicationId: 67890
                       remarks: Please provide a clear passport bio page. Uploaded file is blurry
                       status: Rejected
                       createdAt: 2024-10-01
-                    - otaApplicationID: 97527
+                    - vfsApplicationId: 97527
                       remarks: null
                       status: Approved
                       createdAt: 2024-10-01
@@ -619,7 +619,7 @@ components:
         totalApplications:
           type: integer
           example: 2
-        vfsapplicationId:
+        vfsGroupId:
           type: string
           example: "efgh-lkusm-12345"
         applications:
@@ -706,7 +706,7 @@ components:
     QCRemarksResponse:
       type: object
       properties:
-        vfsApplicationId:
+        vfsGroupId:
           type: string
           example: "eksld-394u93-nkdksl"
         totalApplications:
@@ -719,7 +719,7 @@ components:
     ApplicationRemarks:
       type: object
       properties:
-        otaApplicationID:
+        vfsApplicationId:
           type: integer
           example: 12345
         remarks:
@@ -756,7 +756,7 @@ components:
             items:
               type: object
               properties:
-                vfsApplicationId:
+                vfsGroupId:
                   type: string
                   description: Unique identifier for a specific visa application.
                   example: mmt20394945701
