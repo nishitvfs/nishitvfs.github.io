@@ -526,6 +526,48 @@ paths:
           description: Not Found, e.g., application ID does not exist.
         '500':
           description: Internal Server Error.
+  /api/v1/ota/fetchVisaStatus:
+    get:
+      summary: Fetch visa statuses for a VFS group
+      description: Retrieves visa statuses for all applications under a specified VFS group ID.
+      tags:
+        - OTA
+      security:
+        - OAuth2: []
+      parameters:
+        - name: vfsGroupId
+          in: query
+          description: The unique identifier for the VFS group.
+          required: true
+          schema:
+            $ref: '#/components/schemas/VfsGroupId'
+      responses:
+        '200':
+          description: List of visa statuses for the specified VFS group.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VisaStatusResponse'
+        '400':
+          description: Bad request due to invalid input or missing parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Invalid or missing OAuth token.
+        '404':
+          description: VFS group ID not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
     MasterTableManagement:
@@ -690,7 +732,48 @@ components:
           type: string
           format: date-time
           example: "2024-10-01"
+    VfsGroupId:
+      type: string
+      description: Unique identifier for the VFS group.
+      example: mmt-203949457
 
+    VisaStatusResponse:
+      type: array
+      items:
+        type: object
+        properties:
+          vfsGroupId:
+            type: string
+            description: Unique identifier for the VFS group.
+            example: mmt-203949457
+          totalApplications:
+            type: integer
+            description: Total number of applications in the group.
+            example: 3
+          visaStatus:
+            type: array
+            description: List of visa application statuses.
+            items:
+              type: object
+              properties:
+                vfsApplicationId:
+                  type: string
+                  description: Unique identifier for a specific visa application.
+                  example: mmt20394945701
+                visaStatus:
+                  type: string
+                  description: Current status of the visa application.
+                  enum: [Approved, Rejected, Pending]
+                  example: Approved
+                remarks:
+                  type: string
+                  description: Remarks related to the visa status.
+                  example: Docs insufficient
+                updatedAt:
+                  type: string
+                  format: date-time
+                  description: Last update timestamp for the visa application status.
+                  example: '2024-10-20T00:13:21Z'
     ErrorResponse:
       type: object
       properties:
@@ -701,10 +784,6 @@ components:
           type: string
           example: "Invalid request parameters."      
   securitySchemes:
-    JwtAuthToken:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
     OAuth2:
       type: oauth2
       flows:
